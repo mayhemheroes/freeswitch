@@ -1,5 +1,5 @@
 project: rnshah9/freeswitch
-target: freeswitch
+target: fs-encode
 
 cmds:
   - cmd: /usr/local/freeswitch/bin/fs_encode @@ out.SPEEX
