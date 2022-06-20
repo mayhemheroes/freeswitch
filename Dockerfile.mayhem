@@ -43,12 +43,3 @@ RUN cd /usr/src/freeswitch && make -j`nproc` && make install
 
 # Cleanup the image
 RUN apt-get clean
-
-RUN mkdir -p /deps
-RUN ldd /usr/local/freeswitch/bin/fs_encode | tr -s '[:blank:]' '\n' | grep '^/' | xargs -I % sh -c 'cp % /deps;'
-
-FROM debian:bullseye as package
-
-COPY --from=builder /deps /deps
-COPY --from=builder /usr/local/freeswitch/bin/fs_encode /usr/local/freeswitch/bin/fs_encode
-ENV LD_LIBRARY_PATH=/deps
