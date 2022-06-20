@@ -1,4 +1,4 @@
-project: rnshah9/freeswitch
+project: freeswitch
 target: fs-encode
 
 cmds:
