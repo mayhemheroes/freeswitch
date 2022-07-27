@@ -2,4 +2,4 @@ project: freeswitch
 target: fs-encode
 
 cmds:
-  - cmd: /usr/local/freeswitch/bin/fs_encode @@ out.SPEEX
+  - cmd: /install/bin/fs_encode @@ out.SPEEX
