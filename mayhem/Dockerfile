@@ -2,7 +2,7 @@ FROM debian:bullseye as builder
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -yq install git
 
-ADD . /usr/src/freeswitch
+COPY . /usr/src/freeswitch
 RUN git clone https://github.com/signalwire/libks /usr/src/libs/libks
 RUN git clone https://github.com/freeswitch/sofia-sip /usr/src/libs/sofia-sip
 RUN git clone https://github.com/freeswitch/spandsp /usr/src/libs/spandsp
@@ -40,6 +40,13 @@ RUN cd /usr/src/libs/signalwire-c && PKG_CONFIG_PATH=/usr/lib/pkgconfig cmake . 
 RUN cd /usr/src/freeswitch && ./bootstrap.sh -j
 RUN cd /usr/src/freeswitch && ./configure
 RUN cd /usr/src/freeswitch && make -j`nproc` && make install
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y clang
 
-# Cleanup the image
+# # Cleanup the image
 RUN apt-get clean
+
+FROM debian:bullseye as package
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -yq install libsqlite3-dev
+
+COPY --from=builder /usr/local/freeswitch/bin/fs_encode /fs_encode
