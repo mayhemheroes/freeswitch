@@ -51,7 +51,8 @@ jobs:
       fail-fast: false
       matrix:
         mayhemfile:
-          - mayhem/Mayhemfile
+          - mayhem/Mayhemfile_fs_encode
+          - mayhem/Mayhemfile_switch_u8_strlen
 
     steps:
       - uses: actions/checkout@v2
