@@ -30,7 +30,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -yq install \
 # mod_pgsql
     libpq-dev \
 # mod_sndfile
-    libsndfile1-dev libflac-dev libogg-dev libvorbis-dev
+    libsndfile1-dev libflac-dev libogg-dev libvorbis-dev clang
   
 RUN cd /usr/src/libs/libks && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DWITH_LIBBACKTRACE=1 && make install
 RUN cd /usr/src/libs/sofia-sip && ./bootstrap.sh && ./configure CFLAGS="-g -ggdb" --with-pic --with-glib=no --without-doxygen --disable-stun --prefix=/usr && make -j`nproc --all` && make install
@@ -40,13 +40,8 @@ RUN cd /usr/src/libs/signalwire-c && PKG_CONFIG_PATH=/usr/lib/pkgconfig cmake . 
 RUN cd /usr/src/freeswitch && ./bootstrap.sh -j
 RUN cd /usr/src/freeswitch && ./configure
 RUN cd /usr/src/freeswitch && make -j`nproc` && make install
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y clang
 
-# # Cleanup the image
+RUN sed -i 's/SWITCH_DECLARE(int) switch_u8_strlen/extern "C" SWITCH_DECLARE(int) switch_u8_strlen/' /usr/local/freeswitch/include/freeswitch/switch_utf8.h 
+RUN clang++ /usr/src/freeswitch/mayhem/fuzz_switch_u8_strlen.cpp -fsanitize=fuzzer,address -I /usr/local/freeswitch/include/freeswitch/ -L /usr/local/freeswitch/lib/ -l:libfreeswitch.a -o /fuzz_switch_u8_strlen
+# Cleanup the image
 RUN apt-get clean
-
-FROM debian:bullseye as package
-
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -yq install libsqlite3-dev
-
-COPY --from=builder /usr/local/freeswitch/bin/fs_encode /fs_encode
