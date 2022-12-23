@@ -42,9 +42,7 @@ RUN cd /usr/src/freeswitch && ./configure
 RUN cd /usr/src/freeswitch && make -j`nproc` && make install
 
 RUN sed -i 's/SWITCH_DECLARE(int) switch_u8_strlen/extern "C" SWITCH_DECLARE(int) switch_u8_strlen/' /usr/local/freeswitch/include/freeswitch/switch_utf8.h 
-RUN clang++ /usr/src/freeswitch/mayhem/fuzz_switch_u8_strlen.cpp -fsanitize=fuzzer,address -I /usr/local/freeswitch/include/freeswitch/ -L /usr/local/freeswitch/lib/ -l:libfreeswitch.a -o /fuzz_switch_u8_strlen
-# Cleanup the image
-RUN apt-get clean
+RUN clang++ /usr/src/freeswitch/mayhem/fuzz_switch_u8_strlen.cpp -fsanitize=fuzzer,address -I /usr/local/freeswitch/include/freeswitch/ -L /usr/local/freeswitch/lib/ -l:libfreeswitch.a -o /fuzz
 
 FROM debian:bullseye as package
 
@@ -57,3 +55,4 @@ RUN cd /usr/src/libs/sofia-sip && ./bootstrap.sh && ./configure CFLAGS="-g -ggdb
 RUN cd /usr/src/libs/spandsp && ./bootstrap.sh && ./configure CFLAGS="-g -ggdb" --with-pic --prefix=/usr && make -j`nproc --all` && make install
 
 COPY --from=builder /usr/local/freeswitch/ /usr/local/freeswitch
+COPY --from=builder /fuzz /fuzz_switch_u8_strlen
