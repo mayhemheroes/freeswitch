@@ -45,3 +45,15 @@ RUN sed -i 's/SWITCH_DECLARE(int) switch_u8_strlen/extern "C" SWITCH_DECLARE(int
 RUN clang++ /usr/src/freeswitch/mayhem/fuzz_switch_u8_strlen.cpp -fsanitize=fuzzer,address -I /usr/local/freeswitch/include/freeswitch/ -L /usr/local/freeswitch/lib/ -l:libfreeswitch.a -o /fuzz_switch_u8_strlen
 # Cleanup the image
 RUN apt-get clean
+
+FROM debian:bullseye as package
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -yq install git build-essential cmake automake autoconf libtool pkg-config libtiff5-dev libspeex-dev libspeexdsp-dev libtpl-dev unixodbc-dev libsndfile1-dev libssl-dev libcurl4-openssl-dev
+
+RUN git clone https://github.com/freeswitch/sofia-sip /usr/src/libs/sofia-sip
+RUN git clone https://github.com/freeswitch/spandsp /usr/src/libs/spandsp
+  
+RUN cd /usr/src/libs/sofia-sip && ./bootstrap.sh && ./configure CFLAGS="-g -ggdb" --with-pic --with-glib=no --without-doxygen --disable-stun --prefix=/usr && make -j`nproc --all` && make install
+RUN cd /usr/src/libs/spandsp && ./bootstrap.sh && ./configure CFLAGS="-g -ggdb" --with-pic --prefix=/usr && make -j`nproc --all` && make install
+
+COPY --from=builder /usr/local/freeswitch/ /usr/local/freeswitch
