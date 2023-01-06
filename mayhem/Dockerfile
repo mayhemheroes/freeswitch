@@ -57,3 +57,4 @@ RUN cd /usr/src/libs/spandsp && ./bootstrap.sh && ./configure CFLAGS="-g -ggdb" 
 COPY --from=builder /usr/local/freeswitch/ /usr/local/freeswitch
 COPY --from=builder /fuzz /fuzz_switch_u8_strlen
 ENV LD_LIBRARY_PATH=/usr/local/freeswitch/lib
+
