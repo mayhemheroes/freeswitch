@@ -1,6 +1,6 @@
 FROM debian:bullseye as builder
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -yq install git
+RUN sed -i "s|^deb http://deb.debian.org|# deb http://deb.debian.org|g; s|^# deb http://snapshot.debian.org|deb http://snapshot.debian.org|g" /etc/apt/sources.list && apt-get update -o Acquire::Check-Valid-Until=false && DEBIAN_FRONTEND=noninteractive apt-get -yq install git
 
 COPY . /usr/src/freeswitch
 RUN git clone https://github.com/signalwire/libks /usr/src/libs/libks
@@ -46,7 +46,7 @@ RUN clang++ /usr/src/freeswitch/mayhem/fuzz_switch_u8_strlen.cpp -fsanitize=fuzz
 
 FROM debian:bullseye as package
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -yq install git build-essential cmake automake autoconf libtool pkg-config libtiff5-dev libspeex-dev libspeexdsp-dev libtpl-dev unixodbc-dev libsndfile1-dev libssl-dev libcurl4-openssl-dev
+RUN sed -i "s|^deb http://deb.debian.org|# deb http://deb.debian.org|g; s|^# deb http://snapshot.debian.org|deb http://snapshot.debian.org|g" /etc/apt/sources.list && apt-get update -o Acquire::Check-Valid-Until=false && DEBIAN_FRONTEND=noninteractive apt-get -yq install git build-essential cmake automake autoconf libtool pkg-config libtiff5-dev libspeex-dev libspeexdsp-dev libtpl-dev unixodbc-dev libsndfile1-dev libssl-dev libcurl4-openssl-dev
 
 RUN git clone https://github.com/freeswitch/sofia-sip /usr/src/libs/sofia-sip
 RUN git clone https://github.com/freeswitch/spandsp /usr/src/libs/spandsp
